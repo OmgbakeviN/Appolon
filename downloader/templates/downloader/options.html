@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Options de téléchargement{% endblock %}
+
+{% block content %}
+  <div class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+      <h1 class="text-2xl font-extrabold tracking-tight">Options de téléchargement</h1>
+
+      {% if error %}
+        <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <p class="mt-3 text-slate-600 text-sm">
+        URL :
+        <span class="font-semibold text-slate-900 break-all">{{ url }}</span>
+      </p>
+    </div>
+
+    {% if info %}
+      <div class="grid lg:grid-cols-3 gap-6 items-start">
+        <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          {% if info.thumbnail %}
+            <div class="aspect-video bg-slate-100">
+              <img src="{{ info.thumbnail }}" class="h-full w-full object-cover" alt="">
+            </div>
+          {% endif %}
+          <div class="p-5">
+            <div class="text-lg font-extrabold leading-snug">{{ info.title }}</div>
+            <div class="mt-2 text-sm text-slate-600">
+              <div class="font-semibold text-slate-700">{{ info.uploader }}</div>
+              <div class="text-xs text-slate-500">{{ info.webpage_url }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+            <h2 class="font-extrabold">Télécharger en Audio</h2>
+            <form method="post" action="{% url 'downloader:download' %}" class="mt-4 space-y-3">
+              {% csrf_token %}
+              <input type="hidden" name="url" value="{{ url }}">
+              <input type="hidden" name="mode" value="audio">
+
+              <label class="block text-sm font-semibold text-slate-800">Qualité audio</label>
+              <select name="format_id"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                       focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet">
+                {% for c in audio_choices %}
+                  <option value="{{ c.format_id }}">{{ c.label }}</option>
+                {% endfor %}
+              </select>
+
+              <button
+                class="w-full rounded-xl px-4 py-3 font-semibold text-white
+                       bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+                Télécharger Audio
+              </button>
+
+              <p class="text-xs text-slate-500">
+                Le fichier sera téléchargé dans le format fourni (m4a/webm/opus…).
+              </p>
+            </form>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+            <h2 class="font-extrabold">Télécharger en Vidéo</h2>
+            <form method="post" action="{% url 'downloader:download' %}" class="mt-4 space-y-3">
+              {% csrf_token %}
+              <input type="hidden" name="url" value="{{ url }}">
+              <input type="hidden" name="mode" value="video">
+
+              <label class="block text-sm font-semibold text-slate-800">Qualité vidéo</label>
+              <select name="format_id"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                       focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet">
+                {% for c in video_choices %}
+                  <option value="{{ c.format_id }}">{{ c.label }}</option>
+                {% endfor %}
+              </select>
+
+              <button
+                class="w-full rounded-xl px-4 py-3 font-semibold text-white
+                       bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+                Télécharger Vidéo
+              </button>
+
+              <p class="text-xs text-slate-500">
+                Si la qualité choisie n’inclut pas l’audio, le serveur fusionne automatiquement (FFmpeg requis).
+              </p>
+            </form>
+          </div>
+
+          <a href="/" class="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+            ← Retour
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

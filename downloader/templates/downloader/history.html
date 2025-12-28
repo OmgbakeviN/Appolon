@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Historique — YT Downloader{% endblock %}
+
+{% block content %}
+  <div class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">Historique des téléchargements</h1>
+          <p class="mt-1 text-sm text-slate-600">
+            Connecté en tant que <span class="font-semibold text-slate-900">{{ user.username }}</span>
+          </p>
+        </div>
+
+        <a href="/" class="text-sm font-semibold text-slate-700 hover:text-slate-900">
+          ← Accueil
+        </a>
+      </div>
+
+      <form method="get" class="mt-5 grid gap-3 sm:grid-cols-3">
+        <div class="sm:col-span-1">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Recherche</label>
+          <input name="q" value="{{ q }}"
+            placeholder="Titre, id, url, qualité..."
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                   focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet"/>
+        </div>
+
+        <div class="sm:col-span-1">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Mode</label>
+          <select name="mode"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                   focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet">
+            <option value="all" {% if mode == "all" %}selected{% endif %}>Tout</option>
+            <option value="audio" {% if mode == "audio" %}selected{% endif %}>Audio</option>
+            <option value="video" {% if mode == "video" %}selected{% endif %}>Vidéo</option>
+          </select>
+        </div>
+
+        <div class="sm:col-span-1">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">IP (optionnel)</label>
+          <input name="ip" value="{{ ip }}"
+            placeholder="Ex: 41.202.xx.xx"
+            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                   focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet"/>
+        </div>
+
+        <div class="sm:col-span-3 flex gap-2">
+          <button
+            class="inline-flex items-center justify-center rounded-xl px-4 py-3 font-semibold text-white
+                   bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+            Filtrer
+          </button>
+
+          <a href="{% url 'downloader:history' %}"
+             class="inline-flex items-center justify-center rounded-xl px-4 py-3 font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+            Réinitialiser
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr class="text-left">
+              <th class="px-4 py-3 font-extrabold">Date</th>
+              <th class="px-4 py-3 font-extrabold">Titre</th>
+              <th class="px-4 py-3 font-extrabold">Mode</th>
+              <th class="px-4 py-3 font-extrabold">Qualité</th>
+              <th class="px-4 py-3 font-extrabold">IP</th>
+              <th class="px-4 py-3 font-extrabold">Appareil</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            {% for e in page_obj.object_list %}
+              <tr class="hover:bg-slate-50/60">
+                <td class="px-4 py-3 text-slate-600 whitespace-nowrap">
+                  {{ e.created_at|date:"Y-m-d H:i" }}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-semibold text-slate-900 line-clamp-2">
+                    {{ e.title|default:e.video_id }}
+                  </div>
+                  <a href="{{ e.video_url }}" target="_blank" class="text-xs text-slate-600 hover:text-slate-900 break-all">
+                    {{ e.video_url }}
+                  </a>
+                </td>
+                <td class="px-4 py-3">
+                  {% if e.mode == "audio" %}
+                    <span class="inline-flex rounded-full bg-brandViolet/10 text-brandViolet px-3 py-1 text-xs font-bold">Audio</span>
+                  {% else %}
+                    <span class="inline-flex rounded-full bg-brandBlue/10 text-brandBlue px-3 py-1 text-xs font-bold">Vidéo</span>
+                  {% endif %}
+                </td>
+                <td class="px-4 py-3 text-slate-700">
+                  {{ e.quality_label }}
+                </td>
+                <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                  {{ e.ip_address|default:"—" }}
+                </td>
+                <td class="px-4 py-3 text-slate-700">
+                  <div class="text-xs text-slate-600">{{ e.browser }}</div>
+                  <div class="text-xs text-slate-600">{{ e.os }}</div>
+                  <div class="text-xs text-slate-600">{{ e.device }}</div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td class="px-4 py-8 text-slate-600" colspan="6">
+                  Aucun téléchargement trouvé.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.paginator.num_pages > 1 %}
+        <div class="flex items-center justify-between px-4 py-4 border-t border-slate-200 bg-white">
+          <div class="text-sm text-slate-600">
+            Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+          </div>
+
+          <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+              <a class="rounded-xl px-4 py-2 border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-50"
+                 href="?q={{ q|urlencode }}&mode={{ mode|urlencode }}&ip={{ ip|urlencode }}&page={{ page_obj.previous_page_number }}">
+                Précédent
+              </a>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+              <a class="rounded-xl px-4 py-2 border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-50"
+                 href="?q={{ q|urlencode }}&mode={{ mode|urlencode }}&ip={{ ip|urlencode }}&page={{ page_obj.next_page_number }}">
+                Suivant
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

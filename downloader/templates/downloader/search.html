@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Résultats — {{ q }}{% endblock %}
+
+{% block content %}
+  <div class="flex flex-col gap-6">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight">Résultats</h1>
+          <p class="mt-1 text-slate-600 text-sm">
+            Recherche : <span class="font-semibold text-slate-900">{{ q }}</span>
+          </p>
+        </div>
+
+        <form action="{% url 'downloader:search' %}" method="get" class="flex gap-2 w-full sm:w-auto">
+          <input name="q" value="{{ q }}"
+                 class="w-full sm:w-80 rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm
+                        focus:outline-none focus:ring-4 focus:ring-brandViolet/15 focus:border-brandViolet"
+                 placeholder="Rechercher..." />
+          <button class="rounded-xl px-4 py-3 font-semibold text-white bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+            Go
+          </button>
+        </form>
+      </div>
+
+      {% if error %}
+        <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {{ error }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if items %}
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for it in items %}
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="aspect-video bg-slate-100">
+              {% if it.thumbnail_url %}
+                <img src="{{ it.thumbnail_url }}" alt="" class="h-full w-full object-cover">
+              {% endif %}
+            </div>
+
+            <div class="p-4">
+              <div class="font-bold leading-snug line-clamp-2">{{ it.title }}</div>
+              <div class="mt-2 text-sm text-slate-600">
+                <div class="font-semibold text-slate-700">{{ it.channel_title }}</div>
+                <div class="text-xs text-slate-500">{{ it.published_at }}</div>
+              </div>
+
+              <a href="{% url 'downloader:select_video' it.video_id %}"
+                 class="mt-4 inline-flex w-full items-center justify-center rounded-xl px-4 py-2 font-semibold text-white
+                        bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+                Choisir
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="flex items-center justify-between">
+        <a class="text-sm font-semibold text-slate-700 hover:text-slate-900"
+           href="/"
+        >
+          ← Accueil
+        </a>
+
+        <div class="flex gap-2">
+          {% if prev_page_token %}
+            <a class="rounded-xl px-4 py-2 border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-50"
+               href="{% url 'downloader:search' %}?q={{ q|urlencode }}&page={{ prev_page_token|urlencode }}">
+              Précédent
+            </a>
+          {% endif %}
+
+          {% if next_page_token %}
+            <a class="rounded-xl px-4 py-2 border border-slate-200 bg-white text-sm font-semibold hover:bg-slate-50"
+               href="{% url 'downloader:search' %}?q={{ q|urlencode }}&page={{ next_page_token|urlencode }}">
+              Suivant
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-slate-600">
+        Aucun résultat.
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

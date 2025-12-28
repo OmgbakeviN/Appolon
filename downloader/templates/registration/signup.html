@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+    <h2 class="text-2xl font-extrabold tracking-tight">Créer un compte</h2>
+    <p class="mt-2 text-slate-600 text-sm">Optionnel, mais utile pour garder l’historique.</p>
+
+    <form method="post" class="mt-6 space-y-4">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {{ form.as_p }}
+
+      <button type="submit"
+        class="w-full inline-flex items-center justify-center rounded-xl px-4 py-3 font-semibold text-white
+               bg-gradient-to-r from-brandBlue to-brandViolet hover:opacity-95 transition">
+        Créer
+      </button>
+    </form>
+
+    <p class="mt-4 text-sm text-slate-600">
+      Déjà un compte ?
+      <a class="font-semibold text-slate-900 hover:underline" href="/accounts/login/">
+        Se connecter
+      </a>
+    </p>
+  </div>
+{% endblock %}
