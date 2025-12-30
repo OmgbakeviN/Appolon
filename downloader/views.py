@@ -101,7 +101,16 @@ def options(request):
         audio_choices = build_audio_choices(info)
         video_choices = build_video_choices(info)
     except Exception as exc:
-        error = str(exc)
+        # error = str(exc)
+        msg = str(exc)
+        if "Sign in to confirm you’re not a bot" in msg or "confirm you're not a bot" in msg:
+            error = (
+                "YouTube bloque cette vidéo depuis notre serveur (vérification anti-bot). "
+                "Essaie une autre vidéo. "
+                "Pour certaines vidéos, le téléchargement peut nécessiter une connexion."
+            )
+        else:
+            error = msg
 
     context = {
         "url": url,
