@@ -27,25 +27,10 @@ def extract_video_info(url: str) -> dict[str, Any]:
     """
     Récupère les métadonnées + la liste de formats sans télécharger.
     """
-    # ydl_opts = {
-    #     "quiet": True,
-    #     "noplaylist": True,
-    #     "skip_download": True,
-    # }
-
     ydl_opts = {
         "quiet": True,
         "noplaylist": True,
         "skip_download": True,
-
-        # Réduit certains blocages réseau/YouTube
-        "retries": 5,
-        "fragment_retries": 5,
-        "force_ipv4": True,
-        "sleep_requests": 0.5,
-
-        # Essaye un “client” YouTube différent (souvent plus stable)
-        "extractor_args": {"youtube": {"player_client": ["android", "web"]}},
     }
 
     with YoutubeDL(ydl_opts) as ydl:
